@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { fetchGalleryWithQuery } from './Api/Api';
 import { Button } from './Button/Button';
@@ -11,13 +13,14 @@ import { Modal } from './Modal/Modal';
 export const App = () => {
   const [page, setPage] = useState(1);
   const [images, setImages] = useState([]);
-  const [query, setQuery] = useState([]);
+  const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
   // const [error, setError] = null;
 
   const isFirstRender = useRef(true);
+  const refGallery = useRef(null);
 
   const handleSubmit = evt => {
     evt.preventDefault();
@@ -33,13 +36,15 @@ export const App = () => {
     }
 
     async function getImage() {
-      if (query === 0) {
+      if (query === '') {
         return;
       }
       setIsLoading(true);
       try {
         const response = await fetchGalleryWithQuery(query, page);
         setImages(prevImages => [...prevImages, ...response.hits]);
+      } catch (error) {
+        toast(error.message);
       } finally {
         setIsLoading(false);
       }
@@ -69,7 +74,14 @@ export const App = () => {
       }
     };
     window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, []);
+
+  const handleClick = () => {
+    refGallery.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div
@@ -84,11 +96,17 @@ export const App = () => {
       {isLoading ? (
         <Loader />
       ) : (
-        <ImageGallery images={images} onSelect={selectImage} />
+        <div ref={refGallery}>
+          {' '}
+          <ImageGallery images={images} onSelect={selectImage} />{' '}
+        </div>
       )}
 
       {isOpen && <Modal src={selectedImage} onClose={modalClose} />}
-      {images.length > 0 && <Button onClick={hendleLoadMore} />}
+      {images.length > 0 && (
+        <Button onClick={hendleLoadMore} onButton={handleClick} />
+      )}
+      <ToastContainer />
       <GlobalStyle />
     </div>
   );

@@ -14,7 +14,7 @@ export const Overlay = styled.div`
 
 export const ModalImage = styled.div`
   position: absolute;
-  top: 0;
+  top: 5%;
 
   left: 15%;
   width: 70%;
