@@ -20,7 +20,6 @@ export const App = () => {
   // const [error, setError] = null;
 
   const isFirstRender = useRef(true);
-  const refGallery = useRef(null);
 
   const handleSubmit = evt => {
     evt.preventDefault();
@@ -52,6 +51,14 @@ export const App = () => {
     getImage();
   }, [query, page]);
 
+  useEffect(() => {
+    if (page > 1)
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
+  });
+
   const selectImage = imageUrl => {
     // console.log(imageUrl);
     setSelectedImage(imageUrl);
@@ -79,10 +86,6 @@ export const App = () => {
     };
   }, []);
 
-  const handleClick = () => {
-    refGallery.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <div
       style={{
@@ -96,16 +99,11 @@ export const App = () => {
       {isLoading ? (
         <Loader />
       ) : (
-        <div ref={refGallery}>
-          {' '}
-          <ImageGallery images={images} onSelect={selectImage} />{' '}
-        </div>
+        <ImageGallery images={images} onSelect={selectImage} />
       )}
 
       {isOpen && <Modal src={selectedImage} onClose={modalClose} />}
-      {images.length > 0 && (
-        <Button onClick={hendleLoadMore} onButton={handleClick} />
-      )}
+      {images.length > 0 && <Button onClick={hendleLoadMore} />}
       <ToastContainer />
       <GlobalStyle />
     </div>
